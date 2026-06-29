@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Quiz Objectifs SMART - EQUANS</title>
+    <style>
+        :root {
+            --primary: #2E6CA4;
+            --dark: #222222;
+            --gray: #F5F5F7;
+            --border-color: #CCCCCC;
+            --text-muted: #666666;
+            --success: #2E7D32;
+            --error: #C62828;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--gray);
+            color: var(--dark);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 12px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background: #FFFFFF;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            padding: 20px;
+            margin-top: 10px;
+            position: relative;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        /* Intégration discrète du logo */
+        .header-logo {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        .header-logo img {
+            height: 35px;
+            opacity: 0.85;
+            object-fit: contain;
+        }
+
+        h1 {
+            font-size: 20px;
+            font-weight: 700;
+            text-align: center;
+            color: var(--dark);
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            line-height: 1.4;
+        }
+
+        /* Page de garde */
+        .form-group {
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        select {
+            width: 60%;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: #FFF;
+            text-align: center;
+            outline: none;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            background-color: var(--primary);
+            color: #FFF;
+            border: none;
+            padding: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn:active {
+            background-color: #1F4E78;
+        }
+
+        /* Zone de Quiz */
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background-color: #E0E0E0;
+            border-radius: 2px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-card {
+            display: none;
+        }
+        .question-card.active {
+            display: block;
+        }
+
+        .question-context {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .question-text {
+            font-size: 14px;
+            font-weight: 600;
+            background: #F9F9FB;
+            padding: 12px;
+            border-left: 3px solid var(--primary);
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 18px;
+            line-height: 1.4;
+        }
+
+        .instruction {
+            font-size: 13px;
+            margin-bottom: 12px;
+            font-style: italic;
+            color: var(--text-muted);
+        }
+
+        .options-list {
+            list-style: none;
+            margin-bottom: 18px;
+        }
+
+        .option-item {
+            background: #FFFFFF;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+        .option-item:active {
+            background: #F0F4F8;
+        }
+
+        /* États de réponse */
+        .option-item.correct {
+            border-color: var(--success);
+            background-color: #E8F5E9;
+            color: var(--success);
+            font-weight: 600;
+        }
+        .option-item.wrong {
+            border-color: var(--error);
+            background-color: #FFEBEE;
+            color: var(--error);
+        }
+        .option-item.disabled {
+            pointer-events: none;
+        }
+
+        /* Bloc Explication */
+        .explanation-box {
+            display: none;
+            background: #F4F7F9;
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 18px;
+            font-size: 13px;
+            line-height: 1.45;
+            border: 1px solid #E2E8F0;
+        }
+        .explanation-title {
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 4px;
+        }
+        .smart-proposal {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed var(--border-color);
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        /* Page de Fin */
+        .result-screen {
+            display: none;
+            text-align: center;
+            padding: 10px 0;
+        }
+        .score-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 4px solid var(--primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0 auto 20px auto;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Logo SYLP intégré discrètement en haut de l'application -->
+    <div class="header-logo">
+        <img src="logo-sylp.jpg" alt="Logo SYLP">
+    </div>
+
+    <!-- ÉCRAN D'ACCUEIL -->
+    <div id="welcome-screen">
+        <h1>Quiz Objectifs SMART</h1>
+        <p class="subtitle">Management de chantier & Performance d'Équipe EQUANS</p>
+        
+        <div class="form-group">
+            <label for="q-count">Nombre de questions :</label>
+            <select id="q-count">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6" selected>6 (Défaut)</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+            </select>
+        </div>
+        <button class="btn" onclick="startQuiz()">Démarrer le Quiz</button>
+    </div>
+
+    <!-- ÉCRAN DE JEU -->
+    <div id="quiz-screen" style="display:none;">
+        <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+        <div id="question-container"></div>
+        <button class="btn" id="next-btn" style="display:none;" onclick="nextQuestion()">Question suivante</button>
+    </div>
+
+    <!-- ÉCRAN DE FIN -->
+    <div id="result-screen" class="result-screen">
+        <h1>Quiz Terminé !</h1>
+        <p class="subtitle">Votre évaluation sur les critères SMART</p>
+        <div class="score-circle" id="score-box">0/0</div>
+        <p id="result-comment" style="font-size:14px; margin-bottom:20px; font-weight:500;"></p>
+        <button class="btn" onclick="resetQuiz()">Recommencer</button>
+    </div>
+</div>
+
+<script>
+    // Banque de données des 12 objectifs rigoureusement calibrés
+    const allQuestions = [
+        // --- GROUPE 1 : 3 Objectifs Tout à fait SMART (0 manquant) ---
+        {
+            context: "Sécurité & HSE",
+            text: "« Réduire le taux de fréquence des accidents de l'équipe de 15% d'ici le 31 décembre prochain en mettant en place un quart d'heure sécurité hebdomadaire. »",
+            correct: ["SMART"],
+            options: [
+                { text: "Objectif SMART", key: "SMART" },
+                { text: "Critères manquants : M et T", key: "MT" },
+                { text: "Critères manquants : S et A", key: "SA" },
+                { text: "Critères manquants : R et T", key: "RT" },
+                { text: "Critères manquants : S et M", key: "SM" }
+            ],
+            expl: "L'objectif comporte tous les critères. Spécifique (taux d'accidents), Mesurable (-15%), Atteignable (moyens fournis), Réaliste, Temporellement défini (31 décembre).",
+            proposal: null
+        },
+        {
+            context: "Gestion budgétaire & Matériel",
+            text: "« Réduire la facture de location de matériel de 10% sur le chantier d'extension Nord lors du prochain trimestre en mutualisant les nacelles entre équipes. »",
+            correct: ["SMART"],
+            options: [
+                { text: "Objectif SMART", key: "SMART" },
+                { text: "Critères manquants : A et R", key: "AR" },
+                { text: "Critères manquants : M et T", key: "MT" },
+                { text: "Critères manquants : S et T", key: "ST" },
+                { text: "Critères manquants : S et M", key: "SM" }
+            ],
+            expl: "Tout y est : le lieu et le poste de dépense (S), le pourcentage (M), l'action de mutualisation (A/R) et l'échéance du trimestre (T).",
+            proposal: null
+        },
+        {
+            context: "RSE & Environnement",
+            text: "« Atteindre un taux de valorisation des déchets de chantier de 80% sur l'opération tertiaire d'ici sa livraison en octobre, via le tri sélectif en bennes. »",
+            correct: ["SMART"],
+            options: [
+                { text: "Objectif SMART", key: "SMART" },
+                { text: "Critères manquants : S et A", key: "SA" },
+                { text: "Critères manquants : M et T", key: "MT" },
+                { text: "Critères manquants : R et T", key: "RT" },
+                { text: "Critères manquants : M et R", key: "MR" }
+            ],
+            expl: "L'objectif est complet. Le tri sélectif permet de viser de manière réaliste et mesurable (80%) l'échéance fixée à octobre.",
+            proposal: null
+        },
+
+        // --- GROUPE 2 : 5 Objectifs avec 1 critère manquant ---
+        {
+            context: "Planification & Délais",
+            text: "« Finaliser la pose des chemins de câbles principaux du secteur B avant le 15 novembre. »",
+            correct: ["M"],
+            options: [
+                { text: "Objectif SMART", key: "SMART" },
+                { text: "Critère manquant : M (Mesurable)", key: "M" },
+                { text: "Critère manquant : S (Spécifique)", key: "S" },
+                { text: "Critère manquant : T (Temporel)", key: "T" },
+                { text: "Critère manquant : A (Atteignable)", key: "A" }
+            ],
+            expl: "Il manque un indicateur de quantité ou d'état de conformité précis (ex: 100% de la pose validée ou métrage précis) pour rendre l'avancement mesurable.",
+            proposal: "« Finaliser 100% de la pose des chemins de câbles principaux du secteur B et obtenir la validation du contrôleur avant le 15 novembre. »"
+        },
+        {
+            context: "Qualité & Suivi de chantier",
+            text: "« Résorber l'intégralité des réserves de l'opération de rénovation Hospitalière d'ici la fin du mois. »",
+            correct: ["A"],
+            options: [
+                { text: "Objectif SMART", key: "SMART" },
+                { text: "Critère manquant : A (Atteignable)", key: "A" },
+                { text: "Critère manquant : M (Mesurable)", key: "M" },
+                { text: "Critère manquant : T (Temporel)", key: "T" },
+                { text: "Critère manquant : S (Spécifique)", key: "S" }
+            ],
+            expl: "Viser 'l'intégralité' (100%) à très court terme sans préciser le levier d'action ou si les moyens sont renforcés rend l'objectif non Atteignable / peu acceptable sans plan défini.",
+            proposal: "« Résorber 100% des réserves de l'opération Hospitalière d'ici la fin du mois en mobilisant une équipe dédiée aux finitions pendant 3 jours. »"
+        },
+        {
+            context: "Ressources Humaines & Compétences",
+            text: "« Faire monter en compétences les deux électriciens N3P1 de votre équipe d'ici le départ du prochain chantier en avril. »",
+            correct: ["M"],
+            options: [
+                { text: "Objectif SMART", key: "SMART" },
+                { text: "Critère manquant : M (Mesurable)", key: "M" },
+                { text: "Critère manquant : S (Spécifique)", key: "S" },
+                { text: "Critère manquant : T (Temporel)", key: "T" },
+                { text: "Critère manquant : R (Réaliste)", key: "R" }
+            ],
+            expl: "La 'montée en compétences' n'est pas mesurée. Il faut préciser le diplôme, l'habilitation ou le geste technique visé.",
+            proposal: "« Faire valider l'habilitation B2V par les deux électriciens N3P1 de votre équipe d'ici le départ du prochain chantier en avril. »"
+        },
+        {
+            context: "Sécurité sur le terrain",
+            text: "« Améliorer drastiquement la propreté et le rangement du dépôt de matériel ce vendredi avant 16h. »",
+            correct: ["M"],
+            options: [
+                { text: "Objectif SMART", key: "SMART" },
+                { text: "Critère manquant : M (Mesurable)", key: "M" },
+                { text: "Critère manquant : T (Temporel)", key: "T" },
+                { text: "Critère manquant : S (Spécifique)", key: "S" },
+                { text: "Critère manquant : A (Atteignable)", key: "A" }
+            ],
+            expl: "Le terme 'drastiquement' est subjectif. Il manque un indicateur clair, comme une note d'audit ou un état zéro déchet au sol.",
+            proposal: "« Nettoyer le dépôt pour qu'aucune pièce de matériel ne traîne hors des racks de stockage ce vendredi avant 16h. »"
+        },
+        {
+            context: "Efficacité Énergétique / Productivité",
+            text: "« Réduire de 5% les consommations de carburant des véhicules utilitaires du chantier de la ZAC Centre en sensibilisant les compagnons à l'éco-conduite. »",
+            correct: ["T"],
+            options: [
+                { text: "Objectif SMART", key: "SMART" },
+                { text: "Critère manquant : T (Temporel)", key: "T" },
+                { text: "Critère manquant : M (Mesurable)", key: "M" },
+                { text: "Critère manquant : S (Spécifique)", key: "S" },
+                { text: "Critère manquant : R (Réaliste)", key: "R" }
+            ],
+            expl: "L'objectif est clair et mesurable, mais aucune limite dans le temps (échéance ou durée de la mesure) n'a été planifiée.",
+            proposal: "« Réduire de 5% la consommation de carburant de nos utilitaires sur le chantier ZAC Centre d'ici un mois grâce à l'éco-conduite. »"
+        },
+
+        // --- GROUPE 3 : 4 Objectifs avec 2 critères manquants (réponses à 2 lettres obligatoires pour les choix erronés) ---
+        {
+            context: "Productivité & Performance",
+            text: "« Augmenter la cadence de raccordement des armoires électriques sur le chantier de la Clinique. »",
+            correct: ["MT"],
+            options: [
+                { text: "Objectif SMART", key: "SMART" },
+                { text: "Critères manquants : M et T", key: "MT" },
+                { text: "Critères manquants : S et A", key: "SA" },
+                { text: "Critères manquants : R et T", key: "RT" },
+                { text: "Critères manquants : S et M", key: "SM" }
+            ],
+            expl: "On ne sait pas à quel niveau quantifier la performance (M) ni pour quand cet effort doit aboutir (T).",
+            proposal: "« Passer de 2 à 3 raccordements d'armoires par jour sur le chantier de la Clinique d'ici vendredi soir. »"
+        },
+        {
+            context: "Matériel & Outillage",
+            text: "« Effectuer le contrôle réglementaire périodique de l'ensemble de l'outillage électroportatif de l'équipe de montage. »",
+            correct: ["MT"],
+            options: [
+                { text: "Objectif SMART", key: "SMART" },
+                { text: "Critères manquants : M et T", key: "MT" },
+                { text: "Critères manquants : S et A", key: "SA" },
+                { text: "Critères manquants : S et R", key: "SR" },
+                { text: "Critères manquants : A et R", key: "AR" }
+            ],
+            expl: "L'action est spécifique, mais sans quantité validée réglementairement (ex: 100% de la liste mise à jour) (M) ni date limite (T).",
+            proposal: "« Faire contrôler 100% des outils électroportatifs de l'équipe et apposer les pastilles de conformité avant le 1er octobre. »"
+        },
+        {
+            context: "Reporting & Administratif",
+            text: "« Les chefs de chantier doivent mieux remplir les rapports journaliers d'avancement des travaux. »",
+            correct: ["MT"],
+            options: [
+                { text: "Objectif SMART", key: "SMART" },
+                { text: "Critères manquants : M et T", key: "MT" },
+                { text: "Critères manquants : S et A", key: "SA" },
+                { text: "Critères manquants : S et R", key: "SR" },
+                { text: "Critères manquants : A et T", key: "AT" }
+            ],
+            expl: "Le terme 'mieux' est flou. Il manque un critère d'évaluation ou de conformité (M) ainsi qu'une échéance de mise en application (T).",
+            proposal: "« Transmettre 100% des rapports journaliers complétés et signés sur la plateforme interne chaque soir avant 18h00 dès lundi prochain. »"
+        },
+        {
+            context: "Relation Client & Sous-traitance",
+            text: "« Améliorer la satisfaction du coordinateur SPS lors de ses visites sur nos zones de travaux. »",
+            correct: ["MT"],
+            options: [
+                { text: "Objectif SMART", key: "SMART" },
+                { text: "Critères manquants : M et T", key: "MT" },
+                { text: "Critères manquants : S et A", key: "SA" },
+                { text: "Critères manquants : R et T", key: "RT" },
+                { text: "Critères manquants : S et M", key: "SM" }
+            ],
+            expl: "La satisfaction ne se mesure pas sans indicateur (ex: zéro remarque bloquante) (M) et la période d'évaluation n'est pas spécifiée (T).",
+            proposal: "« Obtenir zéro remarque de niveau 1 de la part du coordinateur SPS sur l'ensemble de ses visites durant tout le mois de mai. »"
+        }
+    ];
+
+    let selectedQuestions = [];
+    let currentIdx = 0;
+    let score = 0;
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    function startQuiz() {
+        const countSelect = document.getElementById('q-count');
+        const numQuestions = parseInt(countSelect.value, 10);
+        
+        // Copie superficielle et mélange complet de la banque de données
+        let pool = [...allQuestions];
+        shuffleArray(pool);
+        
+        // Sélection du nombre de questions demandé par l'utilisateur
+        selectedQuestions = pool.slice(0, numQuestions);
+        
+        currentIdx = 0;
+        score = 0;
+        
+        document.getElementById('welcome-screen').style.display = 'none';
+        document.getElementById('result-screen').style.display = 'none';
+        document.getElementById('quiz-screen').style.display = 'block';
+        
+        renderQuestion();
+    }
+
+    function renderQuestion() {
+        const container = document.getElementById('question-container');
+        const nextBtn = document.getElementById('next-btn');
+        nextBtn.style.display = 'none';
+        
+        // Mise à jour de la barre de progression smartphone
+        const progressPercent = (currentIdx / selectedQuestions.length) * 100;
+        document.getElementById('progress').style.width = progressPercent + '%';
+        
+        const q = selectedQuestions[currentIdx];
+        
+        // Mélange des 5 propositions de réponses
+        let optionsShuffled = [...q.options];
+        shuffleArray(optionsShuffled);
+        
+        let html = `
+            <div class="question-card active">
+                <div class="question-context">${q.context} — Question ${currentIdx + 1}/${selectedQuestions.length}</div>
+                <div class="question-text">${q.text}</div>
+                <div class="instruction">Sélectionnez le diagnostic correct :</div>
+                <ul class="options-list">
+        `;
+        
+        optionsShuffled.forEach(opt => {
+            html += `
+                <li class="option-item" onclick="checkAnswer(this, '${opt.key}', '${q.correct.join('')}')">
+                    ${opt.text}
+                </li>
+            `;
+        });
+        
+        html += `
+                </ul>
+                <div class="explanation-box" id="explanation">
+                    <div class="explanation-title">💡 Analyse terrain :</div>
+                    <p>${q.expl}</p>
+                    ${q.proposal ? `<div class="smart-proposal">🎯 Formulation SMART :<br>${q.proposal}</div>` : ''}
+                </div>
+            </div>
+        `;
+        
+        container.innerHTML = html;
+    }
+
+    function checkAnswer(element, chosenKey, correctKey) {
+        const items = document.querySelectorAll('.option-item');
+        const explanation = document.getElementById('explanation');
+        const nextBtn = document.getElementById('next-btn');
+        
+        // Désactivation des interactions tactiles après le choix
+        items.forEach(item => item.classList.add('disabled'));
+        
+        if (chosenKey === correctKey) {
+            element.classList.add('correct');
+            score++;
+        } else {
+            element.classList.add('wrong');
+            // Recherche et coloration de la bonne réponse
+            items.forEach(item => {
+                if(item.getAttribute('onclick').includes(`'${correctKey}'`)) {
+                    item.classList.add('correct');
+                }
+            });
+        }
+        
+        // Affichage de l'explication et du bouton suivant
+        explanation.style.display = 'block';
+        nextBtn.style.display = 'block';
+        
+        // Défilement automatique fluide vers le bas sur petit écran si nécessaire
+        setTimeout(() => {
+            nextBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 150);
+    }
+
+    function nextQuestion() {
+        currentIdx++;
+        if (currentIdx < selectedQuestions.length) {
+            renderQuestion();
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        document.getElementById('quiz-screen').style.display = 'none';
+        const resultScreen = document.getElementById('result-screen');
+        resultScreen.style.display = 'block';
+        
+        const scoreBox = document.getElementById('score-box');
+        scoreBox.innerText = `${score}/${selectedQuestions.length}`;
+        
+        const comment = document.getElementById('result-comment');
+        const ratio = score / selectedQuestions.length;
+        
+        if (ratio === 1) {
+            comment.innerText = "Parfait ! Les objectifs SMART n'ont plus aucun secret pour vous. Vos chantiers sont parfaitement cadrés.";
+            comment.style.color = "var(--success)";
+        } else if (ratio >= 0.7) {
+            comment.innerText = "Très bon résultat ! Vos objectifs sont globalement clairs et exploitables sur le terrain.";
+            comment.style.color = "var(--primary)";
+        } else {
+            comment.innerText = "Des points de vigilance subsistent. Prenez le temps de bien vérifier chaque critère avant de lancer vos équipes.";
+            comment.style.color = "var(--dark)";
+        }
+    }
+
+    function resetQuiz() {
+        document.getElementById('result-screen').style.display = 'none';
+        document.getElementById('welcome-screen').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
