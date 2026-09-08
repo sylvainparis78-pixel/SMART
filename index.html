@@ -489,11 +489,9 @@
         const countSelect = document.getElementById('q-count');
         const numQuestions = parseInt(countSelect.value, 10);
         
-        // Copie superficielle et mélange complet de la banque de données
         let pool = [...allQuestions];
         shuffleArray(pool);
         
-        // Sélection du nombre de questions demandé par l'utilisateur
         selectedQuestions = pool.slice(0, numQuestions);
         
         currentIdx = 0;
@@ -511,13 +509,11 @@
         const nextBtn = document.getElementById('next-btn');
         nextBtn.style.display = 'none';
         
-        // Mise à jour de la barre de progression smartphone
         const progressPercent = (currentIdx / selectedQuestions.length) * 100;
         document.getElementById('progress').style.width = progressPercent + '%';
         
         const q = selectedQuestions[currentIdx];
         
-        // Mélange des 5 propositions de réponses
         let optionsShuffled = [...q.options];
         shuffleArray(optionsShuffled);
         
@@ -531,7 +527,7 @@
         
         optionsShuffled.forEach(opt => {
             html += `
-                <li class="option-item" onclick="checkAnswer(this, '${opt.key}', '${q.correct.join('')}')">
+                <li class="option-item" data-key="${opt.key}" onclick="checkAnswer(this, '${opt.key}', '${q.correct.join('')}')">
                     ${opt.text}
                 </li>
             `;
@@ -555,27 +551,27 @@
         const explanation = document.getElementById('explanation');
         const nextBtn = document.getElementById('next-btn');
         
-        // Désactivation des interactions tactiles après le choix
+        // Désactivation des clics après la réponse
         items.forEach(item => item.classList.add('disabled'));
         
         if (chosenKey === correctKey) {
             element.classList.add('correct');
             score++;
         } else {
+            // Mauvaise réponse sélectionnée -> passe en rouge
             element.classList.add('wrong');
-            // Recherche et coloration de la bonne réponse
-            items.forEach(item => {
-                if(item.getAttribute('onclick').includes(`'${correctKey}'`)) {
-                    item.classList.add('correct');
-                }
-            });
+            
+            // Recherche et affichage de la bonne réponse -> passe en vert
+            const correctOption = document.querySelector(`.option-item[data-key="${correctKey}"]`);
+            if (correctOption) {
+                correctOption.classList.add('correct');
+            }
         }
         
         // Affichage de l'explication et du bouton suivant
         explanation.style.display = 'block';
         nextBtn.style.display = 'block';
         
-        // Défilement automatique fluide vers le bas sur petit écran si nécessaire
         setTimeout(() => {
             nextBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }, 150);
